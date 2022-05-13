@@ -1,0 +1,31 @@
+.cell {
+    background-color: lightblue;
+    width: 100px;
+    height: 100px;        
+    border: 1px solid darkblue;
+    font-size: 75px;
+    text-align:center;
+    cursor:text;
+}
+
+.cell-wrapper {
+    width: 300px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    margin: 10px;
+    padding: 5px;
+    /* padding: 5px; expands element */
+    /* margin: 5px; moves element */
+}
+
+/* .cell-wrapper:hover {
+    transform: skewY(80deg);
+    transition: 0.5s;
+} */
+
+.clicked {
+    /* background-image: url(https://www.tiktok.com/api/img/?itemId=7074323528153156870&location=0&aid=1988); */
+    background-image: url(https://www.tiktok.com/api/img/?itemId=7074323528153156870&location=0&aid=1988);
+    background-position: center;
+    background-size: 100%;
+}
