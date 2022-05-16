@@ -10,25 +10,30 @@ let selectedY = 0   // the y position of the selected square
 let prevSelectedX = 0 // The previously selected x point on the board
 let prevSelectedY = 0 // The previously selected y point on the board
 
+const maxGrid = 15  // The size of the grid
+
 // Colours:
-let selectedSpot = 'white'
-let newSpot = 'black'
+const newSpotColour = 'black'
+const selectedSpotColour = 'white'
+const flagColour = 'red'
+const bombColour = 'orange'
 
 let start = false; // A new game is started
+let started = false; // The animation has ended and the game started
 
 /* Grid spot info:
     - 0 = unselected
     - 1 = selected and empty
     - 2 = flag
-    - 3 = bomb
+    - 3 = bomb or = 99 on gridNums
 */
 
 /// ****************************** vvv BASIC GRID INFO vvv ***************************************
 
 // Sizes for grid
 const width = height = 700
-const w = width/15
-const h = height/15
+const w = width/maxGrid
+const h = height/maxGrid
 ctx.canvas.width = width
 ctx.canvas.height = height
 
@@ -40,62 +45,69 @@ function makeGrid(){
     gridNums = []   // If a number is around a bomb
 
     // Making basic grid
-    for (let i = 0; i < 15; i++){
+    for (let i = 0; i < maxGrid; i++){
         grid.push([])
         gridNums.push([])
-        for (let j = 0; j < 15; j++){
+        for (let j = 0; j < maxGrid; j++){
             grid[i].push(0)
             gridNums[i].push(0)
         }
     }
-
     console.table(grid)
 }
 
 
+let animating = 0; // if animating = 211 or greater then the animation is done
 async function drawGrid() {
-    for (let i = 0; i <= 15; i++){
-        
-        // Filling colours in the grid:
-        if (i !== 15){
-            for (let j = 0; j < 15; j++){
+    for (let i = 0; i <= maxGrid; i++){
+        // Filling Colours in the grid:
+        for (let j = 0; j < maxGrid; j++){
+            if (i !== maxGrid){
                 if (grid[i][j] === 0){
-                    ctx.fillStyle = 'black'
+                    ctx.fillStyle = newSpotColour
                 }
                 else if (grid[i][j] === 1){
-                    ctx.fillStyle = 'white'
+                    ctx.fillStyle = selectedSpotColour
                 }
                 else if (grid[i][j] === 2){
-                    ctx.fillStyle = 'orange'
+                    if (endGame) ctx.fillStyle = bombColour // If the game is over display bombs
+                    else ctx.fillStyle = newSpotColour
                 }
                 else if (grid[i][j] === 3){
-                    ctx.fillStyle = 'red'
+                    ctx.fillStyle = flagColour
                 }
-
-
-                // filling in the grid
-                if (start){
-                    // Animate the starting grid if start is true
-                    for (let k = 1; k <= 4; k++){
-                        let a = k * 0.25
-                        ctx.globalAlphs = a
-                        ctx.fillRect(i * w, j * w, w, w, h)
-                        await sleep(0.1)
-                        if (i === 14) start = false;
-                    }
-                }
-
-                else {
+            }
+                
+            // filling in the grid
+            if (start){
+                // Animate the starting grid if start is true
+                for (let k = 1; k <= 4; k++){
+                    let a = k * 0.25
+                    ctx.globalAlphs = a
                     ctx.fillRect(i * w, j * w, w, w, h)
+                    await sleep(0)
+                    if (i === maxGrid) start = false;
+                    
                 }
+                animating++; 
+                clickedButton()
+            }
 
+            else {
+                ctx.fillRect(i * w, j * w, w, w, h)
+            }
+
+            if (animating >= maxGrid*maxGrid+1){    // for each square in the grid
+                animating = 0
+                started = true
+                clickedButton()
             }
         }
     }
     
     // Displaying the grid lines:
-    for (let i = 0; i <= 15; i++){
-        if (i === 0 || i === 15){
+    for (let i = 0; i <= maxGrid; i++){
+        if (i === 0 || i === maxGrid){
             ctx.strokeStyle = 'black'
             ctx.lineWidth = 4
         }
@@ -119,18 +131,17 @@ async function drawGrid() {
 
 
 async function displayGridNums(){
-    for (let i = 0; i < 14; i++){
-        for (let j = 0; j < 14; j++){
+    ctx.font = '25px bold'
+    ctx.fillStyle = 'black'
+    ctx.textAlign = 'center'
+
+    for (let i = 0; i <= 14; i++){
+        for (let j = 0; j <= 14; j++){
             const num = gridNums[i][j]
 
-            if (num === 0) continue;
-
-            ctx.font = '20px'
-            ctx.fillStyle = 'black'
-            ctx.textAlign = 'center'
+            if (num === 0 || num === 99) continue;
 
             placeText(num, i, j) 
-
         }
     }
 }
@@ -139,33 +150,53 @@ async function displayGridNums(){
 /// ****************************** ^^^ GRID INFO ^^^ ****************************************
 
 // vvvvvvvvvvvvvvv MOUSE FUNCTIONS vvvvvvvvvvvvvvv
+let clickType;  // If the user right or left
+
+function validMouseClick(e){
+    /* if the spot clicked has already not been clicked or game has not started, 
+    do not register click */
+    if (grid[Math.floor(e.offsetX / w)][Math.floor(e.offsetY / w)] === 0 || start){
+        start = false    // Skip animation if screen is clicked
+        if (animating > 0) started = true  // The game started
+        console.log("started")
+        return true;
+    }
+    else if (gridNums[Math.floor(e.offsetX / w)][Math.floor(e.offsetY / w)] === 99){
+        endGame = true
+        console.log("Game Over")
+
+        gameOver()  // Displays an end game screen
+    }
+    return false;
+}
 
 canvas.addEventListener('mousedown', (e) => {
-    if (!start){
-        textCol = 'darkBlue'
-        const x = e.offsetX;
-        const y = e.offsetY;
-        selectedX = Math.floor(x / w)
-        selectedY = Math.floor(y / w)
-    
-        resetScreen()
-        console.log(selectedX, selectedY)
-    
-        if (grid[selectedX][selectedY] === 3){
-            console.log("Game Over")
+    if (validMouseClick(e)){
+        console.log (animating)
+        if (animating === 0 && started){
+            const x = e.offsetX;
+            const y = e.offsetY;
+            selectedX = Math.floor(x / w)
+            selectedY = Math.floor(y / w)
+        
+            resetScreen()
+            console.log(selectedX, selectedY)
+        
+            if (grid[selectedX][selectedY] === 3){
+                console.log("Game Over")
+            }
+            else{
+                grid[selectedX][selectedY] = 1;
+            }
+            
+            openGrid(selectedX, selectedY)
+            updateDisplay()
+            displayGridNums()
         }
         else{
-            grid[selectedX][selectedY] = 1;
+            animating = -1   // Means there is no current animation playing
         }
-    
-        updateDisplay()
     }
-
-    // Skip animation if screen is clicked
-    else{
-        start = false
-    }
-    displayGridNums()
 })
 
 // ^^^^^^^^^^^^ MOUSE FUNCTIONS ^^^^^^^^^^^^^^^
@@ -177,21 +208,44 @@ function resetScreen(){
 }
 
 function placeText(num, i, j){
-    console.log(selectedX, selectedY, i + ", " + j)
-    textCol = 'darkBlue'
-    ctx.fillStyle = textCol
+    //console.log(selectedX, selectedY, i + ", " + j)
+    ctx.fillStyle = 'black'
     ctx.fillText(num, i * w + w/2, (j + 1) * w - w/4)
 }
 
 function getRandomInt() {
     min = Math.ceil(0)
-    max = Math.floor(15)
+    max = Math.floor(maxGrid)
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
 function updateDisplay(){
     resetScreen()
     drawGrid()
+}
+
+
+
+
+
+// Button functions:
+const buttonDisabledColour = "#178d9c";
+const buttonColour = "#575757";
+
+function clickedButton(){
+    // Timer countdown for re-clicking buttons
+    const playButton = document.getElementById('play_button') // Setting the play button
+
+    // const currentTime = Date.now()
+    // while (Date.now() - currentTime < 2000) {
+    //     playButton.disabled = true
+    // }
+    playButton.disabled = true
+    playButton.style.background = buttonColour
+    if (started){
+        playButton.style.background = buttonDisabledColour
+        playButton.disabled = false
+    }
 }
 
 makeGrid()
