@@ -105,20 +105,3 @@ function gameOver(){
         console.log("game restart")
     }
 }
-
-// function show(){
-//     updateDisplay()
-//     if (cells[i][j].value === 0) showZeros()
-// }
-
-// function showZeros(x, y) {
-//     for (let i = x - 1; i <= x + 1; i++) {
-//         for (let j = y - 1; j <= y + 1; j++) {
-//             if (i < 0 || i > maxGrid-1) continue;
-//             if (j < 0 || j > maxGrid-1) continue;
-//             if (grid[i][j] === 1) continue
-
-//             grid[i][j] = 1    
-//         }
-//     }
-// }

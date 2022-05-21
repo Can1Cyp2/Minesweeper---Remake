@@ -30,7 +30,9 @@
     background-size: 100%;
 }
 
-.play_button{
+
+/* Button info: */
+.play-button{
     padding: 10px 25px;
     font-size: 24px;
     text-align: center;
@@ -40,8 +42,7 @@
     border: rgb(135, 124, 235);
     border-radius: 15px;
 }
-
-.play_button:active{
+.play-button:active{
     background-color: #1ebe73;
     transform: translateY(5px);
   }

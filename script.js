@@ -1,3 +1,4 @@
+// Canvas info
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 
@@ -59,11 +60,23 @@ function makeGrid(){
 
 let animating = 0; // if animating = 211 or greater then the animation is done
 async function drawGrid() {
+    
     for (let i = 0; i <= maxGrid; i++){
         // Filling Colours in the grid:
         for (let j = 0; j < maxGrid; j++){
+
+            // Images   --------------------
+            let img = new Image();
+            img.src = 'https://i.ibb.co/VxYrJ2X/tile.png';  // Tile
+            imgBomb = new Image();
+            imgBomb.src = 'https://i.ibb.co/BGVwMTr/bomb.png';  // Bomb
+            // Images ^^^^^^^^^^^^^^^
+            const x = i * w;
+            const y = j * w;
+
             if (i !== maxGrid){
                 if (grid[i][j] === 0){
+                    //img.onload = function() { ctx.drawImage(img, x, y, w, h) }  // Tiles
                     ctx.fillStyle = newSpotColour
                 }
                 else if (grid[i][j] === 1){
@@ -71,13 +84,13 @@ async function drawGrid() {
                 }
                 else if (grid[i][j] === 2){
                     if (endGame) ctx.fillStyle = bombColour // If the game is over display bombs
-                    else ctx.fillStyle = newSpotColour
+                    else ctx.fillStyle = newSpotColour //img.onload = function() { ctx.drawImage(img, x, y, w, h) }
                 }
                 else if (grid[i][j] === 3){
                     ctx.fillStyle = flagColour
                 }
             }
-                
+
             // filling in the grid
             if (start){
                 // Animate the starting grid if start is true
@@ -139,7 +152,7 @@ async function displayGridNums(){
         for (let j = 0; j <= 14; j++){
             const num = gridNums[i][j]
 
-            if (num === 0 || num === 99) continue;
+            if (num === 0 || num === 99 || grid[i][j] === 3) continue;
 
             placeText(num, i, j) 
         }
@@ -150,54 +163,75 @@ async function displayGridNums(){
 /// ****************************** ^^^ GRID INFO ^^^ ****************************************
 
 // vvvvvvvvvvvvvvv MOUSE FUNCTIONS vvvvvvvvvvvvvvv
-let clickType;  // If the user right or left
+
+let clickType;  // What button the user pressed
+// 0 : Left mouse button
+// 1 : Wheel button or middle button
+// 2 : Right mouse button
 
 function validMouseClick(e){
     /* if the spot clicked has already not been clicked or game has not started, 
     do not register click */
-    if (grid[Math.floor(e.offsetX / w)][Math.floor(e.offsetY / w)] === 0 || start){
-        start = false    // Skip animation if screen is clicked
-        if (animating > 0) started = true  // The game started
-        console.log("started")
-        return true;
+
+    clickType = e.button;
+    if (endGame) return false; // If the game ended
+
+    if (grid[Math.floor(e.offsetX / w)][Math.floor(e.offsetY / w)] === 0 || start || clickType === 2){
+        if (clickType === 2 || clickType === 0){
+            start = false    // Skip animation if screen is clicked
+            if (animating > 0) started = true  // The game started
+            console.log("started", clickType)
+            return true;
+        }
     }
-    else if (gridNums[Math.floor(e.offsetX / w)][Math.floor(e.offsetY / w)] === 99){
+
+    if (clickType === 0 && gridNums[Math.floor(e.offsetX / w)][Math.floor(e.offsetY / w)] === 99){
         endGame = true
         console.log("Game Over")
-
         gameOver()  // Displays an end game screen
     }
+
     return false;
 }
 
 canvas.addEventListener('mousedown', (e) => {
     if (validMouseClick(e)){
+        const x = e.offsetX;
+        const y = e.offsetY;
+        selectedX = Math.floor(x / w)
+        selectedY = Math.floor(y / w)
+
         console.log (animating)
         if (animating === 0 && started){
-            const x = e.offsetX;
-            const y = e.offsetY;
-            selectedX = Math.floor(x / w)
-            selectedY = Math.floor(y / w)
         
             resetScreen()
             console.log(selectedX, selectedY)
-        
-            if (grid[selectedX][selectedY] === 3){
-                console.log("Game Over")
+            if (clickType === 2){
+                grid[selectedX][selectedY] = 3
+                console.log(grid[selectedX][selectedY], "p")
             }
             else{
-                grid[selectedX][selectedY] = 1;
+                if (grid[selectedX][selectedY] === 3){
+                    console.log("Game Over")
+                }
+                
+                else{
+                    grid[selectedX][selectedY] = 1;
+                    openGrid(selectedX, selectedY)
+                }
+                
             }
-            
-            openGrid(selectedX, selectedY)
-            updateDisplay()
-            displayGridNums()
         }
         else{
             animating = -1   // Means there is no current animation playing
         }
+
+        updateDisplay()
+        displayGridNums()
     }
 })
+
+canvas.addEventListener('contextmenu', e => e.preventDefault());    // Prevents right click on board
 
 // ^^^^^^^^^^^^ MOUSE FUNCTIONS ^^^^^^^^^^^^^^^
 
@@ -224,13 +258,10 @@ function updateDisplay(){
     drawGrid()
 }
 
-
-
-
-
 // Button functions:
 const buttonDisabledColour = "#178d9c";
 const buttonColour = "#575757";
+
 
 function clickedButton(){
     // Timer countdown for re-clicking buttons
