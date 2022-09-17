@@ -71,22 +71,23 @@ async function drawGrid() {
             imgBomb = new Image();
             imgBomb.src = 'https://i.ibb.co/BGVwMTr/bomb.png';  // Bomb
             // Images ^^^^^^^^^^^^^^^
+            
             const x = i * w;
             const y = j * w;
 
             if (i !== maxGrid){
-                if (grid[i][j] === 0){
+                if (grid[i][j] === 0) {
                     //img.onload = function() { ctx.drawImage(img, x, y, w, h) }  // Tiles
                     ctx.fillStyle = newSpotColour
                 }
-                else if (grid[i][j] === 1){
+                else if (grid[i][j] === 1) {
                     ctx.fillStyle = selectedSpotColour
                 }
-                else if (grid[i][j] === 2){
+                else if (grid[i][j] === 2) {
                     if (endGame) ctx.fillStyle = bombColour // If the game is over display bombs
                     else ctx.fillStyle = newSpotColour //img.onload = function() { ctx.drawImage(img, x, y, w, h) }
                 }
-                else if (grid[i][j] === 3){
+                else if (grid[i][j] === 3) {
                     ctx.fillStyle = flagColour
                 }
             }
@@ -207,8 +208,12 @@ canvas.addEventListener('mousedown', (e) => {
             resetScreen()
             console.log(selectedX, selectedY)
             if (clickType === 2){
-                grid[selectedX][selectedY] = 3
-                console.log(grid[selectedX][selectedY], "p")
+                if (grid[selectedX][selectedY] === 3) grid[selectedX][selectedY] = 0;   // Unflags square
+                else {
+                    grid[selectedX][selectedY] = 3
+                    console.log(grid[selectedX][selectedY], "p")
+                }
+                
             }
             else{
                 if (grid[selectedX][selectedY] === 3){

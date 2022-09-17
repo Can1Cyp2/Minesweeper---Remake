@@ -23,13 +23,6 @@
     transition: 0.5s;
 } */
 
-.clicked {
-    /* background-image: url(https://www.tiktok.com/api/img/?itemId=7074323528153156870&location=0&aid=1988); */
-    background-image: url(https://www.tiktok.com/api/img/?itemId=7074323528153156870&location=0&aid=1988);
-    background-position: center;
-    background-size: 100%;
-}
-
 
 /* Button info: */
 .play-button{
