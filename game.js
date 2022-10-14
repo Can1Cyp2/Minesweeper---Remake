@@ -9,7 +9,7 @@ function startGame(){
     /* starts the game, bombCount must be set */
     
     // Reset previous game over message if it exists
-    if (document.getElementById('gameOver')) document.getElementById('gameOver').textContent = "";
+    if (document.getElementById('gameOver')) document.getElementById('gameOver').remove();
 
     // Setting up basic components and setting variables
     makeGrid()
