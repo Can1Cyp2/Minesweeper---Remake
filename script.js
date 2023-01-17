@@ -196,45 +196,39 @@ function validMouseClick(e){
 }
 
 canvas.addEventListener('mousedown', (e) => {
-    if (validMouseClick(e)){
-        const x = e.offsetX;
-        const y = e.offsetY;
-        selectedX = Math.floor(x / w)
-        selectedY = Math.floor(y / w)
+    if (!validMouseClick(e)) return;
 
-        console.log (animating)
-        if (animating === 0 && started){
-        
-            resetScreen()
-            console.log(selectedX, selectedY)
-            if (clickType === 2){
-                if (grid[selectedX][selectedY] === 3) grid[selectedX][selectedY] = 0;   // Unflags square
-                else {
-                    grid[selectedX][selectedY] = 3
-                    console.log(grid[selectedX][selectedY], "p")
-                }
-                
-            }
-            else{
-                if (grid[selectedX][selectedY] === 3){
-                    console.log("Game Over")
-                }
-                
-                else{
-                    grid[selectedX][selectedY] = 1;
-                    openGrid(selectedX, selectedY)
-                }
-                
-            }
-        }
-        else{
-            animating = -1   // Means there is no current animation playing
+    const { offsetX, offsetY } = e;
+    selectedX = Math.floor(offsetX / w)
+    selectedY = Math.floor(offsetY / w)
+
+    if (!animating && started) {
+        resetScreen()
+
+        if (clickType === 2) {
+          const spot = grid[selectedX][selectedY];
+          if (spot === 3) grid[selectedX][selectedY] = 0;   // Unflags square
+          else if (spot !== 1) grid[selectedX][selectedY] = 3 // Flags if the square isn't revealed
         }
 
-        updateDisplay()
-        displayGridNums()
+        else {
+            if (grid[selectedX][selectedY] === 3) gameOver();
+            else {
+                grid[selectedX][selectedY] = 1;
+                openGrid(selectedX, selectedY)
+            }
+            
+        }
     }
+    
+    else animating = -1   // Means there is no current animation playing
+
+    // Update
+    updateDisplay()
+    displayGridNums()
 })
+
+
 
 canvas.addEventListener('contextmenu', e => e.preventDefault());    // Prevents right click on board
 
