@@ -20,14 +20,15 @@ function startGame(){
     endGame = false;
     let newBomb;
 
-    for (let i = bombCount; i > 0; i--){
+    for (let i = bombCount; i > 0; i--) {
         newBomb = { 
             x: getRandomInt(),
             y: getRandomInt()
         }
 
-        while (bombs.includes(newBomb)){
-            newBomb = { 
+        // Checking if the bomb is already on the grid
+        while (bombs.filter(bomb => bomb.x === newBomb.x && bomb.y === newBomb.y).length > 0) {
+            newBomb = {
                 x: getRandomInt(),
                 y: getRandomInt()
             }
@@ -36,30 +37,31 @@ function startGame(){
         grid[newBomb.x][newBomb.y] = 2;
         bombs.push(newBomb)
     }
+
     aroundMines()   // Checks for spaces around mines
     updateDisplay()
     clickedButton() // Adds a delay to the button, registers a click to play
 }
 
 
-function aroundMines(){
-    for (let z = 1; z <= bombCount; z++){
+function aroundMines() {
+    for (let z = 0; z <= bombCount; z++) {
+
         // Finding bomb info:
         const { x, y } = bombs[z]
 
-        for (let i = x - 1; i <= x + 1; i++){
-            if (i < 0 || i > maxGrid-1) continue;
-            
-            for (let j = y - 1; j <= y + 1; j++){
+        // Checking around the bomb:
+        for (let i = x - 1; i <= x + 1; i++) {
+          if (i < 0 || i > maxGrid-1) continue;
+          
+          for (let j = y - 1; j <= y + 1; j++) {
                 if (j < 0 || j > maxGrid-1) continue;
-                console.log(i, j)
 
                 if (grid[i][j] !== 2) gridNums[i][j] += 1   // Adding the numbers of bombs touching a tile
                 else gridNums[i][j] = 99;   // Setting the bomb spot to 99
             }
         }
     }
-    console.log(gridNums, grid)
 }
 
 // Opening the grid after a click:
@@ -78,7 +80,6 @@ function openGrid(x, y){
             }
         }
     }
-    console.log()
 }
 
 
