@@ -2,6 +2,7 @@ let bombCount = 25;
 let bombs = []    // locations where bombs were placed
 
 let endGame = false; // Whether the game has ended or not
+let gameWon = false; // Whether the game has been won or not
 
 ///////////////////////////////////////////////////////////
 
@@ -18,6 +19,7 @@ function startGame(){
     start = true;
     started = false;
     endGame = false;
+    gameWon = false;
     let newBomb;
 
     for (let i = bombCount; i > 0; i--) {
@@ -89,6 +91,21 @@ function isSpotAvailable(x, y){
     return false
 }
 
+function checkWin(){
+    // Checks if the game has been won
+    let count = 0;
+    for (let i = 0; i < maxGrid; i++){
+        for (let j = 0; j < maxGrid; j++){
+            if (grid[i][j] === 1) count += 1
+        }
+    }
+
+    if (count === maxGrid*maxGrid - bombCount) {
+        gameWon = true;
+        gameOver()
+    }
+}
+
 
 function gameOver(){
     if (endGame){
@@ -103,9 +120,21 @@ function gameOver(){
         updateDisplay() // Display bombs. Now that endGame is set true
     }
 
+    else if (gameWon){
+        // If the game has ended display game over on screen
+        let header = document.createElement("h1")
+        header.setAttribute("id", "gameOver")
+        document.body.appendChild(header)
+
+        let text = document.createTextNode("Congratulations! You Won :)")
+        header.appendChild(text)
+
+        updateDisplay() // Display bombs. Now that endGame is set true
+    }
+
     // If end game is not true and a new game has started
     else if (start){
-        // removes the game over header if it exists
+        // removes the game over or game won header if it exists
         console.log("game restart")
     }
 }

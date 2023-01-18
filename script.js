@@ -223,6 +223,9 @@ canvas.addEventListener('mousedown', (e) => {
     
     else animating = -1   // Means there is no current animation playing
 
+    // Check if the game is over:
+    checkWin();
+
     // Update
     updateDisplay()
     displayGridNums()
